@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Watch & Earn (Demo)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body>
+  <h1>Watch & Earn Demo</h1>
+  <button onclick="signup()">Signup</button>
+  <button onclick="login()">Login</button>
+  <button onclick="reward()">Simulate Reward</button>
+  <button onclick="balance()">Check Balance</button>
+  <pre id="out"></pre>
+
+  <script>
+    let token = null;
+
+    async function signup() {
+      const res = await fetch("/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: "user"+Math.floor(Math.random()*1000), password: "test123" })
+      });
+      const data = await res.json();
+      token = data.token;
+      out("Signed up. Token: " + token);
+    }
+
+    async function login() {
+      const res = await fetch("/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: "user1", password: "test123" })
+      });
+      const data = await res.json();
+      token = data.token;
+      out("Logged in. Token: " + token);
+    }
+
+    async function reward() {
+      if (!token) return out("No token yet. Signup or login first.");
+      const res = await fetch("/reward", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+        body: JSON.stringify({ tx: crypto.randomUUID() })
+      });
+      const data = await res.json();
+      out("Reward response: " + JSON.stringify(data));
+    }
+
+    async function balance() {
+      if (!token) return out("No token yet. Signup or login first.");
+      const res = await fetch("/balance", {
+        headers: { "Authorization": "Bearer " + token }
+      });
+      const data = await res.json();
+      out("Balance: " + JSON.stringify(data));
+    }
+
+    function out(msg) {
+      document.getElementById("out").textContent = msg;
+    }
+  </script>
+</body>
+</html>
